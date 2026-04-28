@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="py-5">
+    <div class="d-flex gap-2">
+    <a href="{% url 'home' %}" class="btn btn-outline-dark btn-sm">← К списку отелей</a>
+    
+    {% if bookings %}
+        {% if bookings_has_trash %} 
+            <a href="{% url 'clean_history' %}" class="btn btn-outline-danger btn-sm" 
+               onclick="return confirm('Удалить все завершенные и отмененные записи?')">
+                🗑 Очистить историю
+            </a>
+        {% endif %} {# ЗАКРЫВАЕМ ВНУТРЕННИЙ IF #}
+    {% endif %} {# ЗАКРЫВАЕМ ВНЕШНИЙ IF #}
+</div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Отель</th>
+                        <th>Номер</th>
+                        <th>Даты проживания</th>
+                        <th>Итоговая стоимость</th>
+                        <th class="pe-4 text-center">Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="fw-bold">{{ b.room.hotel.name }}</span><br>
+                            <small class="text-muted">📍 {{ b.room.hotel.address }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">№ {{ b.room.number }}</span>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <div><b>Заезд:</b> {{ b.check_in|date:"d.m.Y H:i" }}</div>
+                                <div><b>Выезд:</b> {{ b.check_out|date:"d.m.Y H:i" }}</div>
+
+                            </div>
+                        </td>
+                        <td>
+                            <span class="fs-5 fw-bold text-primary">{{ b.total_price }} ₽</span>
+                        </td>
+                        <td class="pe-4 text-center">
+                           {% if b.status == 'pending' %}
+    <div class="d-flex flex-column gap-2 align-items-center">
+        <span class="badge bg-warning text-dark px-3 w-100">Ожидает оплаты</span>
+        <div class="d-flex gap-2 w-100">
+            <a href="{% url 'update_booking_status' b.pk 'confirmed' %}" 
+               class="btn btn-sm btn-success w-100 py-1">Оплатить</a>
+            
+            <a href="{% url 'update_booking_status' b.pk 'cancelled' %}" 
+               class="btn btn-sm btn-outline-danger px-2 py-1" 
+               onclick="return confirm('Отменить бронирование?')">✕</a>
+        </div>
+    </div>
+{% elif b.status == 'confirmed' %}
+    <div class="d-flex align-items-center justify-content-center gap-2">
+        <span class="badge bg-success px-3 py-2">✅ Подтверждено</span>
+        {% if b.check_out < today %}
+            <a href="{% url 'delete_booking' b.pk %}" class="text-muted" onclick="return confirm('Удалить?')">🗑️</a>
+        {% endif %}
+    </div>
+{% else %}
+    <div class="d-flex align-items-center justify-content-center gap-2">
+        <span class="badge bg-secondary px-3 py-2">Отменено</span>
+        <a href="{% url 'delete_booking' b.pk %}" class="text-danger" onclick="return confirm('Удалить?')">🗑️</a>
+    </div>
+{% endif %}
+
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <div class="display-4 mb-3">📅</div>
+                            <h5>У вас пока нет забронированных номеров.</h5>
+                            <a href="{% url 'home' %}" class="btn btn-primary mt-3">Найти отель</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

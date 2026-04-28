@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование Отелей</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .hotel-card { transition: transform 0.2s; border-radius: 10px; }
+        .hotel-card:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-link { text-decoration: none; padding: 0; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}">🏨 HotelBooking</a>
+        
+        <div class="navbar-nav ms-auto d-flex align-items-center">
+            <!-- КНОПКА ПРАВИЛ (Видна всем) -->
+            <a class="nav-link text-white me-3" href="{% url 'rules' %}">Правила</a>
+
+            {% if user.is_authenticated %}
+                <span class="nav-link text-light me-3">👤 {{ user.username }}</span>
+                <a class="nav-link text-white me-3" href="{% url 'my_bookings' %}">Мои брони</a>
+                
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Выйти</button>
+                </form>
+            {% else %}
+                <a class="nav-link" href="{% url 'login' %}">Войти</a>
+                <a class="btn btn-primary btn-sm ms-2" href="{% url 'register' %}">Регистрация</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>
+
+
+
+
+

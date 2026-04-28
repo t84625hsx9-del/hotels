@@ -1,0 +1,28 @@
+# Python (временные файлы)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Django (секреты и база)
+db.sqlite3
+db.sqlite3-journal
+.env
+media/
+staticfiles/
+
+# Docker (логи и временные данные)
+.docker-data/
+postgres_data/
+
+# IDE (настройки твоего редактора)
+.vscode/
+.idea/
+*.swp
+
+# OS (системный мусор)
+.DS_Store
+Thumbs.db
+

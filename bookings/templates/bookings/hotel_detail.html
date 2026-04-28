@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- БЛОК ВЫВОДА ОШИБОК -->
+    {% if error %}
+    <div class="alert alert-danger shadow-sm border-0 mb-4 d-flex align-items-center">
+        <span class="me-2">⚠️</span>
+        <div><strong>Ошибка:</strong> {{ error }}</div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Инфо об отеле -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h1 class="h3 fw-bold">{{ hotel.name }}</h1>
+                    <p class="text-muted small">📍 {{ hotel.address }}</p>
+                    <hr>
+                    <p>{{ hotel.description|default:"Описание отеля скоро появится." }}</p>
+                    <div class="badge bg-light text-dark border">
+                        Владелец: {{ hotel.owner.username }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список номеров -->
+        <div class="col-md-8">
+            <h3 class="mb-4">Доступные номера</h3>
+            {% for room in rooms %}
+            <div class="card mb-3 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-bold">Номер №{{ room.number }}</h5>
+                            <p class="text-muted mb-2">👤 Вместимость: до {{ room.capacity }} чел.</p>
+                            
+                            <div class="mb-3">
+                                {% for amenity in room.amenities.all %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle me-1">
+                                        {{ amenity.name }}
+                                    </span>
+                                {% empty %}
+                                    <span class="text-muted small">Удобства не указаны</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="fs-4 fw-bold text-primary">{{ room.price_per_night }} ₽</span>
+                            <p class="text-muted small">за ночь</p>
+                        </div>
+                    </div>
+
+                    <!-- ФОРМА БРОНИРОВАНИЯ С ВЫБОРОМ ВРЕМЕНИ -->
+                    <form action="{% url 'create_booking' room.id %}" method="POST" class="row g-2 mt-2">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Заезд (дата и время)</label>
+                            <input type="datetime-local" name="check_in" class="form-control" min="{{ today }}T00:00" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Выезд (дата и время)</label>
+                            <input type="datetime-local" name="check_out" class="form-control" min="{{ today }}T00:00" required>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-dark w-100">Забронировать</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center py-5 text-muted">В этом отеле пока нет свободных номеров.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
