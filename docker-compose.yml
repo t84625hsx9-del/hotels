@@ -1,43 +1,23 @@
-version: '3.8'
-
 services:
-  # База данных PostgreSQL (если решишь перейти на неё с SQLite)
-  db:
-    image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=hotel_db
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
-
   # Django приложение
   web:
     build: .
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py fill_db &&
-             python manage.py runserver 0.0.0.0:8000"
+      sh -c "python3 manage.py migrate &&
+             python3 manage.py fill_db &&
+             python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
     environment:
-      - POSTGRES_DB=hotel_db
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
-      - DB_HOST=db
-    depends_on:
-      - db
-    environment:
-      - DATABASE_URL=postgres://admin:password@db:5432/hotel_db
+      - PYTHONUNBUFFERED=1
 
-  # FastAPI приложение (нейросеть/умный поиск)
+  # FastAPI приложение
   fastapi:
     build: .
-    command: uvicorn fastapi_app:app --host 0.0.0.0 --port 8001 --reload
+    command: python3 -m uvicorn fastapi_app:app --host 0.0.0.0 --port 8001
     volumes:
       - .:/app
     ports:
       - "8001:8001"
-    depends_on:
-      - db
-
-volumes:
-  postgres_data:
