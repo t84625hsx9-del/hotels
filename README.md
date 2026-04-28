@@ -12,7 +12,7 @@
 1. Убедитесь, что у вас установлен Docker и Docker Compose.
 2. Склонируйте репозиторий.
 ```bash
-   git clone https://github.com
+   git clone https://github.com/t84625hsx9-del/hotels.git
    cd project
    ```
 3. Запустите сборку:
