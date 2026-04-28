@@ -29,7 +29,7 @@ docker-compose up --build
   `python3 manage.py runserver`
 - **Запуск FastAPI:**
   `python3 -m uvicorn fastapi_app:app --port 8001`
-**-Для автоматической отмены просроченных броней и имитации возврата средств запустите:**
+- **Для автоматической отмены просроченных броней и имитации возврата средств запустите:**
 `python3 manage.py process_refunds`
 
 ## ⚙️ Особенности поиска
