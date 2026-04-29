@@ -23,7 +23,7 @@ class Command(BaseCommand):
         # 2. Генерируем 10 отелей
         # 2. Генерируем 10 отелей
                 # 2. Генерируем 10 отелей
-        for _ in range(10):
+        for _ in range(100):
             city_name = fake.city()  # Фиксируем город
             
             hotel = Hotel.objects.create(

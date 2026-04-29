@@ -1,14 +1,10 @@
 # Django основное
-Django>=4.2,<5.0
-psycopg2-binary==2.9.9
+django
+fastapi
+uvicorn
+pandas
+psycopg2-binary
+requests
+faker
 
-# FastAPI и сервер для него
-fastapi==0.109.0
-uvicorn==0.27.0
 
-# Инструменты разработки и генерации данных
-faker==22.6.0
-python-dotenv==1.0.1
-
-# Если будешь использовать нейросети или аналитику (опционально)
-requests==2.31.0
