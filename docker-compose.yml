@@ -1,23 +1,47 @@
 services:
-  # Django приложение
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=hotel_db
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret_pass
+
   web:
     build: .
-    command: >
-      sh -c "python3 manage.py migrate &&
-             python3 manage.py fill_db &&
-             python3 manage.py runserver 0.0.0.0:8000"
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     environment:
-      - PYTHONUNBUFFERED=1
+      - DB_NAME=hotel_db
+      - DB_USER=admin
+      - DB_PASS=secret_pass
+      - DB_HOST=db
+    depends_on:
+      - db
 
-  # FastAPI приложение
+  # --- НОВЫЙ БЛОК ДЛЯ АНАЛИТИКИ ---
   fastapi:
     build: .
-    command: python3 -m uvicorn fastapi_app:app --host 0.0.0.0 --port 8001
+    # Запускаем именно файл с FastAPI (проверь имя файла, обычно fastapi_app.py)
+    command: uvicorn fastapi_app:app --host 0.0.0.0 --port 8001
     volumes:
       - .:/app
     ports:
       - "8001:8001"
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - DB_NAME=hotel_db
+      - DB_USER=admin
+      - DB_PASS=secret_pass
+      - DB_HOST=db
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+
+

@@ -22,7 +22,7 @@ docker-compose up --build
 4. Django будет доступен по адресу: `http://localhost:8000`
 5. FastAPI будет доступен по адресу: `http://localhost:8001`
 
-## 🧪 Команды вручную
+## 🧪 Запуск проекта через Python(1 способ)
 - **Наполнение базы данными:**
   `python3 manage.py fill_db`
 - **Запуск Django:**
@@ -32,8 +32,25 @@ docker-compose up --build
 - **Для автоматической отмены просроченных броней и имитации возврата средств запустите:**
 `python3 manage.py process_refunds`
 
+## 🧪 Запуск проекта через Docker (Рекомендуемый способ)
+1. **Запустите контейнеры:**
+   `docker-compose up -d --build`
+2. **Создайте структуру таблиц:**
+   `docker-compose exec web python manage.py migrate`
+3. **Наполните базу отелями:**
+   `docker-compose exec web python manage.py fill_db`
+4. **Создайте администратора:**
+   `docker-compose exec web python manage.py createsuperuser`
+5. **Автоматическая отмена просроченных броней:**
+   `docker-compose exec web python manage.py process_refunds`
+
 ## ⚙️ Особенности поиска
-В проекте реализован поиск через `Lower` и `__contains`, что позволяет обходить ограничения SQLite и находить кириллицу независимо от того, с большой или маленькой буквы она написана в базе.
+В проекте использована база данных **PostgreSQL**, что позволило реализовать быстрый регистронезависимый поиск по кириллице с использованием `icontains`. Это гарантирует мгновенное нахождение отелей независимо от того, в каком регистре введен запрос.
+
+## 🔗 Ссылки на сервисы
+- **🏨 Основной сайт:** [http://localhost:8000](http://localhost:8000)
+- **📊 Документация API (FastAPI):** [http://localhost:8001/docs](http://localhost:8001/docs)
+
 
 ## 💎 Почему этот проект уникален?
 

@@ -19,14 +19,18 @@ class Command(BaseCommand):
             return
 
         for b in late_bookings:
-            # 1. Меняем статус на "Не заехал"
+            total_before = b.total_price 
+            duration = b.check_out - b.check_in
+            nights = duration.days if duration.days > 0 else 1
+            one_night_fee = total_before / nights
+            refund_amount = total_before - one_night_fee
             b.status = 'no_show'
+            b.total_price = one_night_fee
             b.save()
-            
-            # 2. Печатаем уведомление о возврате
             self.stdout.write(
-                f"Клиент {b.user.username} пропустил заезд {b.check_in.strftime('%d.%m %H:%M')}. "
-                f"Сумма {b.total_price} руб. возвращена."
-            )
+                f"Клиент {b.user.username} пропустил заезд. "
+                f"Удержано (1 ночь): {one_night_fee:.2f} руб. "
+                f"К возврату клиенту: {refund_amount:.2f} руб."
+                )
 
-        self.stdout.write(self.style.SUCCESS(f"Обработано {late_bookings.count()} возвратов."))
+

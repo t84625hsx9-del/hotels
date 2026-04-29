@@ -7,11 +7,6 @@ from .models import Hotel, Room, Booking
 from datetime import datetime, date, timedelta
 from django.utils import timezone
 from django.db.models import Q, Min
-from django.db.models import Case, When, Value, IntegerField
-from django.db.models.functions import Lower
-
-
-# --- ИНСТРУМЕНТЫ ДЛЯ ИСПРАВЛЕНИЯ РАСКЛАДКИ ---
 
 
 
@@ -32,30 +27,23 @@ def get_user_ai_profile(user):
 
 
 def hotel_list(request):
-    # 1. Получаем то, что ввел пользователь (например, "отель")
     q = request.GET.get('q', '').strip()
     city_filter = request.GET.get('city_filter', '')
     sort_by = request.GET.get('sort', 'price_desc')
 
+    # Аннотируем минимальную цену
     hotels = Hotel.objects.annotate(min_price=Min('rooms__price_per_night'))
 
     if q:
-        # 2. Генерируем варианты написания
-        q_lower = q.lower()      # отель
-        q_cap = q.capitalize()   # Отель
-        
-        # 3. Ищем все варианты сразу. 
-        # Если в базе "Отель", а ввели "отель", сработает второй фильтр (q_cap)
-        hotels = hotels.filter(
-            Q(name__contains=q_lower) | 
-            Q(name__contains=q_cap) |
-            Q(name__contains=q.upper()) # На случай "ОТЕЛЬ"
-        ).distinct()
+        # В Postgres icontains работает с кириллицей идеально.
+        # Найдет "Отель", "отель", "ОТЕЛЬ", даже если ты ввел "ОТ"
+        hotels = hotels.filter(name__icontains=q)
 
-    # Фильтрация по городу и сортировка
+    # Фильтрация по городу (тоже можно через icontains для надежности)
     if city_filter:
-        hotels = hotels.filter(city=city_filter)
+        hotels = hotels.filter(city__icontains=city_filter)
     
+    # Сортировка
     hotels = hotels.order_by('min_price' if sort_by == 'price_asc' else '-min_price')
 
     all_cities = Hotel.objects.values_list('city', flat=True).distinct().order_by('city')
@@ -67,6 +55,7 @@ def hotel_list(request):
         'current_city': city_filter,
         'sort_by': sort_by
     })
+
 
 def hotel_detail(request, hotel_id):
     hotel = get_object_or_404(Hotel, id=hotel_id)
@@ -209,7 +198,6 @@ def delete_booking(request, pk):
     
     return redirect('my_bookings')
 
-# И раз уж мы добавляем удаление, проверь, есть ли и эта функция:
 @login_required
 def delete_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk, user=request.user)
