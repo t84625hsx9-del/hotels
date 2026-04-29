@@ -65,4 +65,4 @@ class Command(BaseCommand):
                 )
 
 
-        self.stdout.write(self.style.SUCCESS(f'База готова! Создано 10 отелей с привязкой городов к описанию.'))
+        self.stdout.write(self.style.SUCCESS(f'База готова! Создано 100 отелей с привязкой городов к описанию.'))
