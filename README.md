@@ -45,6 +45,8 @@ docker-compose up --build
    `docker-compose exec web python manage.py createsuperuser`
 6. **Автоматическая отмена просроченных броней:**
    `docker-compose exec web python manage.py process_refunds`
+7. **Автоматическая отмена просроченных броней:**
+`docker rm -f $(docker ps -aq)`
 
 ## ⚙️ Особенности поиска
 В проекте использована база данных **PostgreSQL**, что позволило реализовать быстрый регистронезависимый поиск по кириллице с использованием `icontains`. Это гарантирует мгновенное нахождение отелей независимо от того, в каком регистре введен запрос.
