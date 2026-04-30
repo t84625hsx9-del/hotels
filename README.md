@@ -45,7 +45,7 @@ docker-compose up --build
    `docker-compose exec web python manage.py createsuperuser`
 6. **Автоматическая отмена просроченных броней:**
    `docker-compose exec web python manage.py process_refunds`
-7. **Автоматическая отмена просроченных броней:**
+7. **Удаление страых контейнеров:**
 `docker rm -f $(docker ps -aq)`
 
 ## ⚙️ Особенности поиска
