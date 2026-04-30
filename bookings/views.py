@@ -95,23 +95,22 @@ def create_booking(request, room_id):
         check_in_str = request.POST.get('check_in')  
         check_out_str = request.POST.get('check_out')
 
-        try:
-            # 1. Парсим даты из строк (формат datetime-local)
-            d1_naive = datetime.strptime(check_in_str, '%Y-%m-%dT%H:%M')
-            d2_naive = datetime.strptime(check_out_str, '%Y-%m-%dT%H:%M')
-            
-            # Делаю их "aware" (с учетом временной зоны)
-            d1 = timezone.make_aware(d1_naive)
-            d2 = timezone.make_aware(d2_naive)
+        if not check_in_str or not check_out_str:
+            return redirect('hotel_detail', hotel_id=room.hotel.id)
 
-            # Переменные для повторного отображения страницы в случае ошибки
+        try:
+            # 1. Парсим даты
+            d1 = timezone.make_aware(datetime.strptime(check_in_str, '%Y-%m-%dT%H:%M'))
+            d2 = timezone.make_aware(datetime.strptime(check_out_str, '%Y-%m-%dT%H:%M'))
+
+            # Контекст для возврата при ошибке (с сортировкой номеров!)
             context_on_error = {
                 'hotel': room.hotel, 
-                'rooms': room.hotel.rooms.all(),
-                'today': date.today().isoformat(),
+                'rooms': room.hotel.rooms.all().order_by('price_per_night'), # СОРТИРОВКА
+                'today': timezone.now().date().isoformat(),
             }
 
-            # 2. ПРОВЕРКА: Прошлое (нельзя забронировать на "вчера")
+            # 2. ПРОВЕРКА: Прошлое
             if d1 < timezone.now():
                 context_on_error['error'] = "Нельзя бронировать на прошедшее время!"
                 return render(request, 'bookings/hotel_detail.html', context_on_error)
@@ -122,26 +121,23 @@ def create_booking(request, room_id):
                 context_on_error['error'] = "Минимальный срок бронирования — 1 сутки (24 часа)!"
                 return render(request, 'bookings/hotel_detail.html', context_on_error)
 
-            # 4. ПРОВЕРКА: Пересечение (свободен ли номер на эти даты)
-                       # 4. ПРОВЕРКА: Пересечение (теперь проверяем ВСЕ брони этого юзера)
+            # 4. ПРОВЕРКА: Пересечение броней пользователя
             overlap = Booking.objects.filter(
-                user=request.user, # ВАЖНО: ищем любые брони этого человека
+                user=request.user,
                 status__in=['pending', 'confirmed', 'checked_in'],
-                check_in__lt=d2,   # которые начинаются раньше, чем новая бронь закончится
-                check_out__gt=d1   # и заканчиваются позже, чем новая бронь начнется
+                check_in__lt=d2,
+                check_out__gt=d1
             ).exists()
 
             if overlap:
-                context_on_error['error'] = "У вас уже есть другая бронь на эти даты! Нельзя забронировать два отеля одновременно."
+                context_on_error['error'] = "У вас уже есть другая бронь на эти даты!"
                 return render(request, 'bookings/hotel_detail.html', context_on_error)
 
-
-            # 5. РАСЧЕТ ЦЕНЫ
-            # Считаем полные сутки. Если 1 день и 2 часа -> округляем до 2 суток (или как тебе удобнее)
+            # 5. РАСЧЕТ ЦЕНЫ (Логика: Цена номера из БД * Сутки)
             days_count = duration.days
-            if duration.seconds > 0: # Если есть "хвостик" по часам, считаем как полные сутки
-                days_count += 1
-            
+            if duration.seconds > 0:
+                 days_count += 1
+                 
             total_price = room.price_per_night * days_count
 
             # 6. СОЗДАНИЕ БРОНИ
@@ -154,14 +150,14 @@ def create_booking(request, room_id):
                 status='pending'
             )
             
-            # Передаем цену на страницу успеха
             return render(request, 'bookings/success.html', {'total_price': total_price})
 
-        except (ValueError, TypeError, AttributeError) as e:
-            print(f"Ошибка данных: {e}")
+        except (ValueError, TypeError) as e:
+            print(f"Ошибка парсинга дат: {e}")
             return redirect('hotel_detail', hotel_id=room.hotel.id)
 
     return redirect('hotel_detail', hotel_id=room.hotel.id)
+
 
 
 

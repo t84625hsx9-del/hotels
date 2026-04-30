@@ -35,13 +35,15 @@ docker-compose up --build
 ## 🧪 Запуск проекта через Docker (Рекомендуемый способ)
 1. **Запустите контейнеры:**
    `docker-compose up -d --build`
-2. **Создайте структуру таблиц:**
+2. **Для статичных файлов(таких как bootstrap.min.css):**
+`docker-compose exec web python manage.py collectstatic --noinput`
+3. **Создайте структуру таблиц:**
    `docker-compose exec web python manage.py migrate`
-3. **Наполните базу отелями:**
+4. **Наполните базу отелями:**
    `docker-compose exec web python manage.py fill_db`
-4. **Создайте администратора:**
+5. **Создайте администратора:**
    `docker-compose exec web python manage.py createsuperuser`
-5. **Автоматическая отмена просроченных броней:**
+6. **Автоматическая отмена просроченных броней:**
    `docker-compose exec web python manage.py process_refunds`
 
 ## ⚙️ Особенности поиска
